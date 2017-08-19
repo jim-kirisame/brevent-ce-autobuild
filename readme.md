@@ -2,7 +2,12 @@
 
 ## 使用说明
 
-将apksigner.jar和autogen.sh放到黑域仓库目录下，在终端中输入sh autogen.sh 即可
+下载后将`apksigner.jar`和`autogen.sh`放到黑域仓库目录下，在终端中执行
+
+```
+chmod +x autogen.sh
+./autogen.sh
+```
 
 ## 系统需求
 
@@ -10,7 +15,7 @@
 
 建议在Linux下使用，但是你也可以在Windows下通过Msys或者其他终端来执行此脚本。
 
-仅在msys2下测试使用
+仅在msys2下测试过，不保证其他系统也可以使用。
 
 ## 授权协议
 
