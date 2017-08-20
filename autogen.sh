@@ -41,4 +41,4 @@ else
     mv ce.apk br-$VERSION-ce-unsigned.apk
 fi
 
-
+rm tmp
