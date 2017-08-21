@@ -12,7 +12,10 @@ gradle :brevent:aR
 
 SERVER_VER=$(cat brevent-server.txt)
 FILE_NAME=br-$SERVER_VER.apk
-mkdir tmp 
+
+if [ ! -d tmp ]; then
+    mkdir tmp 
+fi
 cd tmp
 
 # 添加黑域服务器
