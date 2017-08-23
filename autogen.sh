@@ -5,11 +5,7 @@ git fetch
 VERSION=$(git describe --tags `git rev-list --tags --max-count=1`)  
 git checkout $VERSION
 
-# 编译
-gradle clean
-gradle :brevent:aR
-
-
+# 版本查询
 SERVER_VER=$(cat brevent-server.txt)
 FILE_NAME=br-$SERVER_VER.apk
 
@@ -18,11 +14,26 @@ if [ ! -d tmp ]; then
 fi
 cd tmp
 
-# 添加黑域服务器
+# 下载原版APP
+if [ ! -f $FILE_NAME ]; then
+    wget https://piebridge.me/br/$FILE_NAME
+fi
 if [ ! -f $FILE_NAME ]; then
     wget https://piebridge.me/br/archive/$FILE_NAME
 fi
+if [ ! -f $FILE_NAME ]; then
+    echo "作者尚未放出$SERVER_VER版本的APK，请稍后再试。"
+    exit -1;
+fi
 unzip $FILE_NAME classes2.dex
+cd ../
+
+# 编译
+gradle clean
+gradle :brevent:aR
+
+# 添加黑域服务器
+cd tmp
 jar uf ../ce.apk classes2.dex
 rm classes2.dex
 cd ../
