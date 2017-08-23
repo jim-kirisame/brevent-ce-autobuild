@@ -23,17 +23,24 @@ if [ ! -f $FILE_NAME ]; then
 fi
 if [ ! -f $FILE_NAME ]; then
     echo "作者尚未放出$SERVER_VER版本的APK，请稍后再试。"
+    echo "或手工下载$SERVER_VER，将其重命名为$FILE_NAME后放到tmp文件夹下。"
     exit -1;
 fi
-unzip $FILE_NAME classes2.dex
+
 cd ../
 
 # 编译
 gradle clean
 gradle :brevent:aR
 
+if [ ! -f ce.apk ]; then
+    echo "编译失败，请查看上方日志以获取更多信息。"
+    exit -1;
+fi
+
 # 添加黑域服务器
 cd tmp
+unzip $FILE_NAME classes2.dex
 jar uf ../ce.apk classes2.dex
 rm classes2.dex
 cd ../
