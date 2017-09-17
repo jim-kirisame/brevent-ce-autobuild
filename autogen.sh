@@ -1,13 +1,43 @@
 KEY_PATH=https://github.com/android/platform_build/raw/master/target/product/security/
 
 # 同步源码
+echo "同步源码……"
 git fetch
-VERSION=$(git describe --tags `git rev-list --tags --max-count=1`)  
-git checkout $VERSION
 
+echo "查询远端版本"
 # 版本查询
-SERVER_VER=$(cat brevent-server.txt)
-FILE_NAME=br-$SERVER_VER.apk
+for i in `curl -s https://piebridge.me/br/`; do
+    if [[ $i =~ href=\"(.*)\"\>br-(v[0-9]\.[0-9]\.[0-9][a-z]?)(.play)?\.apk ]]; then
+        urls[0]="https://piebridge.me/br/${BASH_REMATCH[1]}"
+        vers[0]="${BASH_REMATCH[2]}"
+    fi
+done
+
+for i in `curl -s https://piebridge.me/br/archive/`; do
+    if [[ $i =~ href=\"(.*)\"\>br-(v[0-9]\.[0-9]\.[0-9][a-z]?)(.play)?\.apk ]]; then
+        urls=("${urls[@]}" "https://piebridge.me/br/archive/${BASH_REMATCH[1]}")
+        vers=("${vers[@]}" "${BASH_REMATCH[2]}")
+    fi
+done
+
+VERSIONS=$(git describe --tags `git rev-list --tags --max-count=10`)
+
+for tag in $VERSIONS; do
+    git checkout $tag
+    SERVER_VER=$(cat brevent-server.txt)
+    i=0
+    for ver in ${vers[@]} ; do
+        if [[ "$ver" = "$SERVER_VER" ]] ; then
+            url=${urls[$i]};
+            break 2;
+        fi
+        ((i++));
+    done 
+done
+
+
+FILE_NAME=br-$ver.apk
+echo "当前编译版本：$ver"
 
 if [ ! -d tmp ]; then
     mkdir tmp 
@@ -16,14 +46,11 @@ cd tmp
 
 # 下载原版APP
 if [ ! -f $FILE_NAME ]; then
-    wget https://piebridge.me/br/$FILE_NAME
+    wget $url -O $FILE_NAME;
 fi
 if [ ! -f $FILE_NAME ]; then
-    wget https://piebridge.me/br/archive/$FILE_NAME
-fi
-if [ ! -f $FILE_NAME ]; then
-    echo "作者尚未放出$SERVER_VER版本的APK，请稍后再试。"
-    echo "或手工下载$SERVER_VER，将其重命名为$FILE_NAME后放到tmp文件夹下。"
+    echo "作者尚未放出$ver版本的APK，请稍后再试。"
+    echo "或手工下载$ver，将其重命名为$FILE_NAME后放到tmp文件夹下。"
     exit -1;
 fi
 
@@ -56,10 +83,10 @@ fi
 # 签名
 if [ -f apksigner.jar ]; then
     java -jar apksigner.jar sign --key testkey.pk8 --cert testkey.x509.pem ce.apk
-    mv ce.apk br-$VERSION-ce.apk
+    mv ce.apk br-$ver-ce.apk
 else
     echo "apksigner.jar 不存在，将不会对此APK进行签名。"
-    mv ce.apk br-$VERSION-ce-unsigned.apk
+    mv ce.apk br-$ver-ce-unsigned.apk
 fi
 
 
