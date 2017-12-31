@@ -1,3 +1,4 @@
+#!/bin/sh
 KEY_PATH=https://github.com/android/platform_build/raw/master/target/product/security/
 
 # 同步源码
